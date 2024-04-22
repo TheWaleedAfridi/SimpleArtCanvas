@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Color Canvas Drawing</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            border: 2px solid #000;
+            cursor: crosshair;
+        }
+        input[type="text"] {
+            margin-bottom: 10px;
+        }
+        .slider-label {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="drawingCanvas" width="1220" height="660"></canvas>
+    <div>
+        <input type="text" id="colorInput" placeholder="Enter color name (e.g., red)">
+        <button onclick="changeColor()">Confirm</button>
+        <button onclick="toggleMode()">Erase</button>
+        <input type="range" id="lineWidthSlider" min="1" max="50" value="3" onchange="changeLineWidth()">
+        <span class="slider-label" id="lineWidthTextLabel">Line Width: <span id="lineWidthValue">3</span></span>
+        <button onclick="clearCanvas()">Clear All</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let isErasing = false;
+        let drawingColor = 'black'; // Default color
+        let lineWidth = 3; // Default line width
+
+        const validColors = ['red', 'blue', 'green', 'black', 'yellow', 'purple', 'pink', 'grey'];
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(event) {
+            if (isErasing) {
+                ctx.globalCompositeOperation = 'destination-out';
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+            }
+
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(event.offsetX, event.offsetY);
+        }
+
+        function draw(event) {
+            if (!isDrawing) return;
+
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = drawingColor;
+
+            ctx.lineTo(event.offsetX, event.offsetY);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function changeColor() {
+            const colorInput = document.getElementById('colorInput').value.toLowerCase(); // Convert input to lowercase
+            if (validColors.includes(colorInput)) {
+                drawingColor = colorInput;
+                isErasing = false;
+                document.querySelector('button:nth-of-type(2)').innerText = 'Erase';
+                document.getElementById('lineWidthTextLabel').innerText = 'Line Width:';
+            } else {
+                alert('Invalid color name! Please enter one of: red, blue, green, black, yellow, purple, pink, grey');
+            }
+        }
+
+        function toggleMode() {
+            isErasing = !isErasing;
+            if (isErasing) {
+                document.querySelector('button:nth-of-type(2)').innerText = 'Draw';
+                document.getElementById('lineWidthTextLabel').innerText = 'Eraser Width:';
+            } else {
+                document.querySelector('button:nth-of-type(2)').innerText = 'Erase';
+                document.getElementById('lineWidthTextLabel').innerText = 'Line Width:';
+            }
+        }
+
+        function changeLineWidth() {
+            lineWidth = document.getElementById('lineWidthSlider').value;
+            document.getElementById('lineWidthValue').innerText = lineWidth;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</body>
+</html>
